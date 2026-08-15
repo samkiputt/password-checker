@@ -259,7 +259,6 @@ result_label.pack(
     pady=(14, 4)
 )
 
-
 suggestion_label = ctk.CTkLabel(
     main_card,
     text="",
@@ -271,8 +270,6 @@ suggestion_label.pack(
     padx=30,
     pady=(0, 15)
 )
-
-
 
 save_var = ctk.BooleanVar(value=False)
 
@@ -292,12 +289,6 @@ save_checkbox.pack(
     padx=30,
     pady=(5, 20)
 )
-
-
-# =========================
-# FOOTER
-# =========================
-
 footer = ctk.CTkLabel(
     app,
     text="PASSWORD SECURITY TOOL  •  LOCAL ANALYSIS",
@@ -307,10 +298,4 @@ footer = ctk.CTkLabel(
 footer.pack(
     pady=(0, 10)
 )
-
-
-# =========================
-# START APPLICATION
-# =========================
-
 app.mainloop()
