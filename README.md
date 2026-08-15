@@ -16,7 +16,24 @@ Project ini dibuat sebagai project pembelajaran Cyber Security untuk pemula, khu
 - Python 3
 - CustomTkinter — untuk membuat GUI.
 - Regular Expression (re) — untuk memeriksa karakter password.
+- Hashlib — untuk SHA-256 hashing.
+- Random & String — untuk menghasilkan saran password.
 
+# Installation
+Pastikan Python sudah terinstall.
 
-Hashlib — untuk SHA-256 hashing.
-Random & String — untuk menghasilkan saran password.
+Clone repository:
+
+git clone https://github.com/samkiputt/password-checker.git
+cd password-checker
+
+Install dependency:
+
+pip install customtkinter
+▶️ Run
+
+Jalankan aplikasi menggunakan:
+
+python app.py
+
+Setelah dijalankan, aplikasi akan menampilkan GUI Password Checker.
