@@ -38,5 +38,18 @@ pip install customtkinter
 ```bash
 python app.py
 ```
-
 Setelah dijalankan, aplikasi akan menampilkan GUI Password Checker.
+
+
+# Project Purpose
+
+Project ini dibuat sebagai bagian dari pembelajaran Cyber Security & Ethical Hacking, dengan tujuan memahami:
+
+- Password security
+- Password strength
+- Hashing
+- Regular expression
+- Basic security programming
+- GUI application menggunakan Python
+
+# 
