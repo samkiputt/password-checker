@@ -23,10 +23,10 @@ Project ini dibuat sebagai project pembelajaran Cyber Security untuk pemula, khu
 Pastikan Python sudah terinstall.
 
 Clone repository:
-
+```bash
 git clone https://github.com/samkiputt/password-checker.git
 cd password-checker
-
+```
 Install dependency:
 
 pip install customtkinter
