@@ -22,17 +22,21 @@ Project ini dibuat sebagai project pembelajaran Cyber Security untuk pemula, khu
 # Installation
 Pastikan Python sudah terinstall.
 
-Clone repository:
+### Clone repository:
+```bash
 git clone https://github.com/samkiputt/password-checker.git
 cd password-checker
-
-Install dependency:
-
+```
+# Install Dependencies
+```bash
 pip install customtkinter
-▶️ Run
+```
 
-Jalankan aplikasi menggunakan:
+# Run
+### Jalankan aplikasi menggunakan:
 
+```bash
 python app.py
+```
 
 Setelah dijalankan, aplikasi akan menampilkan GUI Password Checker.
