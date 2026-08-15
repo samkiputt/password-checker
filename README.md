@@ -52,8 +52,8 @@ Project ini dibuat sebagai bagian dari pembelajaran Cyber Security & Ethical Hac
 - Basic security programming
 - GUI application menggunakan Python
 
-# Screenshots
-##  Screenshots
+
+## Screenshots
 
 ### Main Interface
 
