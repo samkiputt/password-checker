@@ -53,5 +53,12 @@ Project ini dibuat sebagai bagian dari pembelajaran Cyber Security & Ethical Hac
 - GUI application menggunakan Python
 
 # Screenshots
-![Password Checker Screenshot](fotopertama.png)
-![Password Checker Screenshot](fotokedua.png)
+##  Screenshots
+
+### Main Interface
+
+![Password Checker Main Interface](fotopertama.png)
+
+### Password Analysis
+
+![Password Checker Result](fotokedua.png)
