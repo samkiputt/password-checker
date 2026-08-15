@@ -4,6 +4,7 @@ import re
 import hashlib
 import random
 import string
+import math  # tambahan: untuk perhitungan entropy
 
 
 ctk.set_appearance_mode("Dark")
@@ -13,60 +14,183 @@ app = ctk.CTk()
 app.title("Password Checker")
 app.geometry("500x450")
 
+COMMON_PASSWORDS = {
+    "password", "password1", "password123", "123456", "12345678",
+    "123456789", "1234567890", "12345", "qwerty", "qwerty123",
+    "abc123", "admin", "admin123", "letmein", "welcome", "monkey",
+    "dragon", "master", "login", "princess", "football", "iloveyou",
+    "sunshine", "shadow", "superman", "michael", "654321", "111111",
+    "000000", "123123", "666666", "121212", "987654321", "whatever",
+    "trustno1", "passw0rd", "zaq12wsx", "P@ssw0rd", "password1!",
+    "changeme", "test", "test123", "guest", "hello", "hello123",
+    "batman", "starwars", "soccer", "baseball", "hockey", "jordan"
+}
+
+SEQUENCES = "abcdefghijklmnopqrstuvwxyz0123456789"
+KEYBOARD_ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm", "1234567890"]
+SYMBOLS = r'[!@#$%^&*(),.?":{}|<>]'
+
+
+def contains_sequence(password):
+    """Deteksi urutan berurutan seperti abc, 123 (maju & mundur)."""
+    pwd = password.lower()
+    for i in range(len(pwd) - 2):
+        chunk = pwd[i:i + 3]
+        if chunk in SEQUENCES or chunk[::-1] in SEQUENCES:
+            return True
+    return False
+
+
+def contains_keyboard_pattern(password):
+    """Deteksi pola keyboard seperti qwerty, asdf, zxcv."""
+    pwd = password.lower()
+    for i in range(len(pwd) - 2):
+        chunk = pwd[i:i + 3]
+        for row in KEYBOARD_ROWS:
+            if chunk in row or chunk[::-1] in row:
+                return True
+    return False
+
+
+def has_repeated_chars(password):
+    return re.search(r'(.)\1{2,}', password) is not None
+
+
+def has_leet_substitution(password):
+    leet = password.lower()
+    leet = leet.replace("4", "a").replace("1", "l").replace("3", "e")
+    leet = leet.replace("0", "o").replace("5", "s").replace("7", "t")
+    leet = leet.replace("$", "s").replace("@", "a").replace("!", "i")
+    return leet in COMMON_PASSWORDS or any(
+        w in leet for w in ("password", "admin", "qwerty", "letmein",
+                            "welcome", "iloveyou", "monkey", "dragon")
+    )
+
+
+def estimate_entropy(password):
+    pool = 0
+    if re.search(r'[a-z]', password):
+        pool += 26
+    if re.search(r'[A-Z]', password):
+        pool += 26
+    if re.search(r'[0-9]', password):
+        pool += 10
+    if re.search(SYMBOLS, password):
+        pool += 33
+    if pool == 0:
+        return 0
+    return len(password) * math.log2(pool)
+
+
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
 def suggest_password(password):
+    if password.lower() in COMMON_PASSWORDS or len(password) < 8:
+        length = max(12, len(password))
+        chars = string.ascii_letters + string.digits + "!@#$%^&*()"
+        return ''.join(random.choice(chars) for _ in range(length))
+
     suggestions = []
     if not re.search(r'[A-Z]', password):
         suggestions.append(random.choice(string.ascii_uppercase))
 
     if not re.search(r'[a-z]', password):
         suggestions.append(random.choice(string.ascii_lowercase))
-    
+
     if not re.search(r'[0-9]', password):
         suggestions.append(random.choice(string.digits))
 
-    if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+    if not re.search(SYMBOLS, password):
         suggestions.append(random.choice(string.punctuation))
-        
+
     while len(suggestions) + len(password) < 12:
-        suggestions.append(random.choice(string.ascii_letters + string.digits + "1@#$%^&*()"))
+        suggestions.append(random.choice(string.ascii_letters + string.digits + "!@#$%^&*()"))
 
     return password + ''.join(suggestions)
 
 def check_password():
     password = password_entry.get()
-    strength = 0 
 
-    if len(password) >= 12:
-        strength += 2
-    elif len(password) >= 8:
-        strength += 1
-
-    if re.search(r'[A-Z]', password):
-        strength += 1
-
-    if re.search(r'[a-z]', password):
-        strength += 1
-
-    if re.search(r'[0-9]', password):
-        strength += 1
     
-    if re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
-        strength += 1
+    if not password:
+        result_label.configure(text="Enter a password to analyze", text_color=TEXT)
+        suggestion_label.configure(text="")
+        progress_bar.set(0)
+        return
 
+    strength = 0  
 
-    progress_bar.set(strength / 6)
+    length = len(password)
+    if length >= 20:
+        strength += 25
+    elif length >= 16:
+        strength += 20
+    elif length >= 12:
+        strength += 15
+    elif length >= 10:
+        strength += 10
+    elif length >= 8:
+        strength += 5
 
-    if strength < 4:
+    # ---- 2. Variasi karakter (maks 20 poin) ----
+    if re.search(r'[A-Z]', password):
+        strength += 5
+    if re.search(r'[a-z]', password):
+        strength += 5
+    if re.search(r'[0-9]', password):
+        strength += 5
+    if re.search(SYMBOLS, password):
+        strength += 5
+
+  
+    entropy = estimate_entropy(password)
+    if entropy >= 80:
+        strength += 20
+    elif entropy >= 60:
+        strength += 15
+    elif entropy >= 40:
+        strength += 10
+    elif entropy >= 25:
+        strength += 5
+
+    deductions = 0
+    if password.lower() in COMMON_PASSWORDS:
+        deductions += 60   
+    if has_leet_substitution(password):
+        deductions += 15
+    if contains_sequence(password):
+        deductions += 15
+    if contains_keyboard_pattern(password):
+        deductions += 15
+    if has_repeated_chars(password):
+        deductions += 15
+    if re.search(r'(19|20)\d{2}', password):  
+        deductions += 10
+    if length <= 6:
+        deductions += 20
+    if len(set(password)) == 1: 
+        deductions += 30
+
+    strength = max(0, strength - deductions)
+
+  
+    if (re.search(r'[A-Z]', password) and re.search(r'[a-z]', password)
+            and re.search(r'[0-9]', password) and re.search(SYMBOLS, password)
+            and length >= 12 and deductions == 0):
+        strength = min(100, strength + 10)
+
+    
+    progress_bar.set(strength / 100)
+
+    if strength < 40:
         result_label.configure(text="Weak Password", text_color="red")
         suggestion = suggest_password(password)
         suggestion_label.configure(text=f"Suggest: {suggestion}")
-    elif strength <= 4:
+    elif strength < 65:
         result_label.configure(text="Moderate Password", text_color="orange")
         suggestion_label.configure(text="try adding more characters, numbers, or symbols.")
-    elif strength <= 5:
+    elif strength < 85:
         result_label.configure(text="Strong Password", text_color="green")
         suggestion_label.configure(text="")
     else:
@@ -77,7 +201,7 @@ def check_password():
         hashed = hash_password(password)
         with open("password.txt", "a") as file:
             file.write(hashed + "\n")
-        messagebox.showinfo("Saved","Password has been hashed and saved to password.txt")
+        messagebox.showinfo("Saved", "Password has been hashed and saved to password.txt")
 
 def toogle_password():
     if password_entry.cget("show") == "*":
@@ -293,11 +417,6 @@ save_checkbox.pack(
     pady=(5, 20)
 )
 
-
-# =========================
-# FOOTER
-# =========================
-
 footer = ctk.CTkLabel(
     app,
     text="PASSWORD SECURITY TOOL  •  LOCAL ANALYSIS",
@@ -307,10 +426,5 @@ footer = ctk.CTkLabel(
 footer.pack(
     pady=(0, 10)
 )
-
-
-# =========================
-# START APPLICATION
-# =========================
 
 app.mainloop()
